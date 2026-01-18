@@ -97,7 +97,7 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
             if (!entry.getKey().equals(uuid)) {
                 for (Melody melody : entry.getValue().values()) {
                     String name = melody.name();
-                    if (this.searchQuery.isEmpty() || melody.uploader().toLowerCase().contains(this.searchQuery) || name.toLowerCase().contains(this.searchQuery)) {
+                    if (this.searchQuery.isEmpty() || (melody.uploader() != null && melody.uploader().toLowerCase().contains(this.searchQuery)) || name.toLowerCase().contains(this.searchQuery)) {
                         addMelody(commandBuilder, eventBuilder, rowIndex, entry.getKey() + ":" + melody.name(), name);
                         rowIndex++;
                     }
@@ -177,7 +177,7 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
                 UUID melodyUUID = UUID.fromString(parts[0]);
                 String melodyName = parts[1];
                 Melody melody = registry.get(melodyUUID, melodyName);
-                if (melody != null && melody.uploader().equals(Utils.getUUID(ref).toString())) {
+                if (melody != null && melody.uploader() != null && melody.uploader().equals(Utils.getUUID(ref).toString())) {
                     registry.delete(melodyUUID, melodyName);
                     setMelody(ref, "");
                     rebuildList(ref);
