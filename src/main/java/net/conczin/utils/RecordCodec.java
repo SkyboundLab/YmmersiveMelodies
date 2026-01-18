@@ -8,6 +8,7 @@ import com.hypixel.hytale.codec.schema.config.Schema;
 import com.hypixel.hytale.codec.util.RawJsonReader;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.bson.BsonDocument;
+import org.bson.BsonNull;
 import org.bson.BsonValue;
 
 import javax.annotation.Nonnull;
@@ -231,7 +232,12 @@ public abstract class RecordCodec<C> implements Codec<C> {
         }
 
         void encode(BsonDocument doc, C value, ExtraInfo info) {
-            doc.put(name, codec.encode(getter.apply(value), info));
+            T fieldValue = getter.apply(value);
+            if (fieldValue == null) {
+                doc.put(name, new BsonNull());
+            } else {
+                doc.put(name, codec.encode(fieldValue, info));
+            }
         }
 
         void schema(SchemaContext ctx, Map<String, Schema> props) {
