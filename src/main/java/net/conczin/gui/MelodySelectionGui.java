@@ -214,7 +214,7 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
             UUID melodyUUID = UUID.fromString(parts[0]);
             String melodyName = parts[1];
             Melody melody = registry.get(melodyUUID, melodyName);
-            return melody != null && melody.uploader().equals(uuid.toString());
+            return melody != null && melody.uploader() != null && melody.uploader().equals(uuid.toString());
         }
         return false;
     }
