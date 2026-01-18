@@ -49,7 +49,7 @@
     "TimeSeconds": 2,
     "Input": [
       {
-        "ItemId": "Ingredient_Bolt_Cotton",
+        "ItemId": "Ingredient_Bolt_Wool",
         "Quantity": 3
       },
       {
