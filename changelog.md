@@ -1,3 +1,7 @@
+# 1.0.3
+
+* Replaced bronze with copper to allow crafting the items in vanilla
+
 # 1.0.2
 
 * Fixed crashes when deleting melodies or sharing instruments with states
