@@ -22,7 +22,7 @@ jobs:
 
       - name: Set Path
         run: |
-          HYTALE_JAR="$HOME/.var/app/com.hypixel.HytaleLauncher/data/Hytale/install/dev/package/game/latest/Server/HytaleServer.jar"
+          HYTALE_JAR="$HOME/.var/app/com.hypixel.HytaleLauncher/data/Hytale/install/release/package/game/latest/Server/HytaleServer.jar"
           echo "HYTALE_JAR=$HYTALE_JAR" >> $GITHUB_ENV
 
       - name: Download Server
