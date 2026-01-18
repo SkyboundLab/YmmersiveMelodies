@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 public class MelodyAsset implements JsonAssetWithMap<String, DefaultAssetMap<String, MelodyAsset>> {
     public static final AssetBuilderCodec<String, MelodyAsset> CODEC = AssetBuilderCodec.builder(
@@ -37,7 +38,7 @@ public class MelodyAsset implements JsonAssetWithMap<String, DefaultAssetMap<Str
                     if (path == null) return;
                     Path midiPath = path.getParent().resolve(path.getFileName().toString().replaceFirst("\\.json$", ".midi"));
                     try (InputStream midiStream = Files.newInputStream(midiPath)) {
-                        o.melody = new Melody(o.name, MidiParser.parseMidi(midiStream));
+                        o.melody = new Melody(o.name, new UUID(0, 0).toString(), MidiParser.parseMidi(midiStream));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                         // Nop

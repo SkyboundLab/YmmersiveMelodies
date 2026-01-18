@@ -6,10 +6,12 @@ import net.conczin.utils.RecordCodec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
-public record Melody(String name, List<Track> tracks) {
+public record Melody(String name, String uploader, List<Track> tracks) {
     public static final RecordCodec<Melody> CODEC = RecordCodec.composite(
             "Name", Codec.STRING, Melody::name,
+            "Uploader", Codec.STRING, Melody::uploader,
             "Tracks", new ListCodec<>(Track.CODEC), Melody::tracks,
             Melody::new
     );

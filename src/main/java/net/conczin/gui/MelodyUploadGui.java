@@ -99,9 +99,9 @@ public class MelodyUploadGui extends CodecDataInteractiveUIPage<MelodyUploadGui.
 
                 try (InputStream in = uri.toURL().openStream()) {
                     List<Melody.Track> tracks = MidiParser.parseMidi(in);
-                    resource.add(uuid, new Melody(data.name, tracks));
+                    resource.add(uuid, new Melody(data.name, uuid.toString(), tracks));
                 }
-                returnToSelection(ref, store, data.name);
+                returnToSelection(ref, store, uuid.toString() + ":" + data.name);
             } catch (Exception e) {
                 error(e.getMessage());
                 return;

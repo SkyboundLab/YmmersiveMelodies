@@ -65,22 +65,24 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
         UUID uuid = Utils.getUUID(ref);
 
         Map<String, Melody> ownMelodies = resource.get(uuid);
-        List<Melody> melodies = filterAndSort(ownMelodies);
+        List<Melody> ownMelodyList = filterAndSort(ownMelodies);
 
         int rowIndex = 0;
 
         // Own melodies section
-        if (!melodies.isEmpty()) {
+        if (!ownMelodyList.isEmpty()) {
             addSeparator(commandBuilder, rowIndex, "customUI.melodySelection.separator.own");
             rowIndex++;
         }
-        for (Melody melody : melodies) {
+        for (Melody melody : ownMelodyList) {
             addMelody(commandBuilder, eventBuilder, rowIndex, uuid + ":" + melody.name(), melody.name());
             rowIndex++;
         }
 
         // Public melodies section
-        if (!ownMelodies.isEmpty()) {
+        boolean hasPublic = !MelodyAsset.getAssetStore().getAssetMap().getAssetMap().isEmpty() ||
+                            resource.getMelodies().values().stream().anyMatch(m -> !m.isEmpty());
+        if (hasPublic) {
             addSeparator(commandBuilder, rowIndex, "customUI.melodySelection.separator.server");
             rowIndex++;
         }
@@ -91,10 +93,21 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
                 rowIndex++;
             }
         }
+        for (Map.Entry<UUID, Map<String, Melody>> entry : resource.getMelodies().entrySet()) {
+            if (!entry.getKey().equals(uuid)) {
+                for (Melody melody : entry.getValue().values()) {
+                    String name = melody.name();
+                    if (this.searchQuery.isEmpty() || melody.uploader().toLowerCase().contains(this.searchQuery) || name.toLowerCase().contains(this.searchQuery)) {
+                        addMelody(commandBuilder, eventBuilder, rowIndex, entry.getKey() + ":" + melody.name(), name);
+                        rowIndex++;
+                    }
+                }
+            }
+        }
 
         // Button states
         commandBuilder.set("#Stop.Disabled", selectedMelody.isEmpty());
-        commandBuilder.set("#Delete.Disabled", selectedMelody.isEmpty() || !selectedMelody.startsWith(uuid + ":"));
+        commandBuilder.set("#Delete.Disabled", selectedMelody.isEmpty() || !canDelete(selectedMelody, resource, uuid));
         // commandBuilder.set("#Tracks.Disabled", selectedMelody.isEmpty());
     }
 
@@ -158,11 +171,18 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
 
         // Delete music
         if ("Delete".equals(data.action)) {
-            YmmersiveMelodiesRegistry resource = store.getResource(YmmersiveMelodiesRegistry.getResourceType());
-            String melodyName = selectedMelody.contains(":") ? selectedMelody.split(":", 2)[1] : selectedMelody;
-            resource.delete(Utils.getUUID(ref), melodyName);
-            setMelody(ref, "");
-            rebuildList(ref);
+            YmmersiveMelodiesRegistry registry = store.getResource(YmmersiveMelodiesRegistry.getResourceType());
+            if (selectedMelody.contains(":")) {
+                String[] parts = selectedMelody.split(":", 2);
+                UUID melodyUUID = UUID.fromString(parts[0]);
+                String melodyName = parts[1];
+                Melody melody = registry.get(melodyUUID, melodyName);
+                if (melody != null && melody.uploader().equals(Utils.getUUID(ref).toString())) {
+                    registry.delete(melodyUUID, melodyName);
+                    setMelody(ref, "");
+                    rebuildList(ref);
+                }
+            }
         }
 
         // Switch to tracks selection
@@ -186,5 +206,16 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
 
     private static String getMelody(Ref<EntityStore> ref) {
         return Utils.getData(ref, "MelodyProgress", MelodyProgress.CODEC).melody;
+    }
+
+    private static boolean canDelete(String selectedMelody, YmmersiveMelodiesRegistry registry, UUID uuid) {
+        if (selectedMelody.contains(":")) {
+            String[] parts = selectedMelody.split(":", 2);
+            UUID melodyUUID = UUID.fromString(parts[0]);
+            String melodyName = parts[1];
+            Melody melody = registry.get(melodyUUID, melodyName);
+            return melody != null && melody.uploader().equals(uuid.toString());
+        }
+        return false;
     }
 }

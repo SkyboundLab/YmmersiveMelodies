@@ -48,6 +48,8 @@ public class YmmersiveMelodiesRegistry implements Resource<EntityStore> {
 
     private Map<UUID, Map<String, Melody>> melodies = new HashMap<>();
 
+    public static final UUID GLOBAL_UUID = new UUID(0, 0);
+
     public static ResourceType<EntityStore, YmmersiveMelodiesRegistry> getResourceType() {
         return YmmersiveMelodies.getInstance().getYmmersiveMelodiesRegistry();
     }
