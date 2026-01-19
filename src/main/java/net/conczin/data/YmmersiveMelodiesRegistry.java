@@ -66,7 +66,10 @@ public class YmmersiveMelodiesRegistry implements Resource<EntityStore> {
     }
 
     public void delete(UUID uuid, String name) {
-        melodies.get(uuid).remove(name);
+        Map<String, Melody> userMelodies = melodies.get(uuid);
+        if (userMelodies != null) {
+            userMelodies.remove(name);
+        }
     }
 
     public Melody get(UUID uuid, String name) {

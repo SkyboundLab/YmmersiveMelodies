@@ -177,7 +177,7 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
                 UUID melodyUUID = UUID.fromString(parts[0]);
                 String melodyName = parts[1];
                 Melody melody = registry.get(melodyUUID, melodyName);
-                if (melody != null && melody.uploader() != null && melody.uploader().equals(Utils.getUUID(ref).toString())) {
+                if (melody != null && (melody.uploader() == null || melody.uploader().equals(Utils.getUUID(ref).toString()))) {
                     registry.delete(melodyUUID, melodyName);
                     setMelody(ref, "");
                     rebuildList(ref);
@@ -214,7 +214,7 @@ public class MelodySelectionGui extends CodecDataInteractiveUIPage<MelodySelecti
             UUID melodyUUID = UUID.fromString(parts[0]);
             String melodyName = parts[1];
             Melody melody = registry.get(melodyUUID, melodyName);
-            return melody != null && melody.uploader() != null && melody.uploader().equals(uuid.toString());
+            return melody != null && (melody.uploader() == null || melody.uploader().equals(uuid.toString()));
         }
         return false;
     }

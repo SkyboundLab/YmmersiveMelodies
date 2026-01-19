@@ -18,6 +18,8 @@ import net.conczin.data.YmmersiveMelodiesRegistry;
 import net.conczin.utils.RecordCodec;
 import net.conczin.utils.Utils;
 
+import javax.sound.midi.InvalidMidiDataException;
+
 import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.net.URI;
@@ -63,9 +65,10 @@ public class MelodyUploadGui extends CodecDataInteractiveUIPage<MelodyUploadGui.
                 // Get player UUID
                 UUID uuid = Utils.getUUID(ref);
 
-                // Check for duplicate names
+                String name = data.name.trim();
+        // Check for duplicate names
                 YmmersiveMelodiesRegistry resource = store.getResource(YmmersiveMelodiesRegistry.getResourceType());
-                if (resource.get(uuid, data.name) != null) {
+                if (resource.get(uuid, name) != null) {
                     error("A melody with this title already exists");
                     return;
                 }
@@ -99,9 +102,16 @@ public class MelodyUploadGui extends CodecDataInteractiveUIPage<MelodyUploadGui.
 
                 try (InputStream in = uri.toURL().openStream()) {
                     List<Melody.Track> tracks = MidiParser.parseMidi(in);
-                    resource.add(uuid, new Melody(data.name, uuid.toString(), tracks));
+                    resource.add(uuid, new Melody(name, uuid.toString(), tracks));
+                } catch (RuntimeException e) {
+                    if (e.getCause() instanceof InvalidMidiDataException) {
+                        error("Invalid MIDI file format. Please ensure the file is a valid MIDI file.");
+                    } else {
+                        error("Failed to parse MIDI file: " + e.getCause().getMessage());
+                    }
+                    return;
                 }
-                returnToSelection(ref, store, uuid.toString() + ":" + data.name);
+                returnToSelection(ref, store, uuid.toString() + ":" + name);
             } catch (Exception e) {
                 error(e.getMessage());
                 return;

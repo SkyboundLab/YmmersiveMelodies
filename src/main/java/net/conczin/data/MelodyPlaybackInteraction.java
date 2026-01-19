@@ -103,6 +103,17 @@ public class MelodyPlaybackInteraction extends SimpleInteraction {
 
         if (melody == null) return;
 
+        // Count notes to play to adjust volume for reverb buildup
+        int notesToPlay = 0;
+        for (Melody.Track track : melody.tracks()) {
+            for (Melody.Note note : track.notes()) {
+                if (note.time() >= progress.time && note.time() < progress.time + delta) {
+                    long delay = note.time() - (progress.time + delta) + buffer;
+                    if (delay > 0) notesToPlay++;
+                }
+            }
+        }
+
         // Play notes
         for (Melody.Track track : melody.tracks()) {
             // TODO: Track filter
@@ -123,6 +134,11 @@ public class MelodyPlaybackInteraction extends SimpleInteraction {
                     float factor = 0.5f;
                     float adjustedVolume = (float) (volume / Math.sqrt(pitch * Math.pow(2, octave - 4)));
                     volume = volume * (1.0f - factor) + adjustedVolume * factor;
+
+                    // Adjust for reverb buildup when many notes play simultaneously
+                    if (notesToPlay > 1) {
+                        volume /= (float) Math.sqrt(notesToPlay);
+                    }
 
                     int length = findClosestLength(note.length());
                     int soundEventIndexNote = SoundEvent.getAssetMap().getIndex("SFX_Ymmersive_Melodies_%s_C%s_%sms".formatted(instrument, octave, length));
